@@ -4,9 +4,9 @@
   ...
 }:
 
-let
-  pubkeys = import ../../modules/pubkeys.nix { inherit lib; };
-in
+# let
+#   pubkeys = import ../../modules/pubkeys.nix { inherit lib; };
+# in
 {
   nix.settings.experimental-features = [
     "nix-command"
@@ -15,6 +15,7 @@ in
 
   # basic sane defaults for vms
   boot.loader.grub.enable = true;
+
   services.openssh = {
     enable = true;
     settings = {

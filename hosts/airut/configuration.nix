@@ -7,8 +7,6 @@
   ];
 
   networking.hostName = hostname;
-
-  # recommended for virtualized Hetzner hosts
   services.qemuGuest.enable = true;
 
   system.autoUpgrade = {
@@ -16,14 +14,14 @@
     dates = "daily";
     randomizedDelaySec = "30min";
 
-    flake = "github:your-org/nixos-hetzner#${hostname}";
+    flake = "github:sakuexe/nixos_cloud#${hostname}";
 
     operation = "boot";
-    allowReboot = true;
-    rebootWindow = {
-      lower = "01:00";
-      upper = "03:00";
-    };
+    allowReboot = false;
+    # rebootWindow = {
+    #   lower = "01:00";
+    #   upper = "03:00";
+    # };
 
     runGarbageCollection = true;
   };

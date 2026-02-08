@@ -31,7 +31,7 @@
   in
   {
     nixosConfigurations = {
-      airutvps = mkHost "airut";
+      airut = mkHost "airut";
     };
   };
 }
