@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ hostname, ... }:
 {
   programs.bash.enable = true;
   programs.bash.shellAliases = {
@@ -8,7 +8,7 @@
 
     rebuild = ''
       sudo nixos-rebuild switch \
-      --flake 'github:sakuexe/nixos_cloud#airut' --refresh
+      --flake 'github:sakuexe/nixos_cloud#${hostname}' --refresh
     '';
     dockerref = "docker compose down && docker compose up -d";
   };
