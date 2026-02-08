@@ -16,7 +16,7 @@ in
 
   system.autoUpgrade = {
     enable = true;
-    dates = "daily";
+    dates = "02:35";
     randomizedDelaySec = "30min";
 
     flake = "github:sakuexe/nixos_cloud#${hostname}";

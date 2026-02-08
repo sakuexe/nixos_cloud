@@ -2,9 +2,8 @@ name: Update flake.lock
 
 on:
   schedule:
-    # runs on 02:19 and 14:19
+    # runs on 02:19
     - cron: "19 2 * * *"
-    - cron: "19 14 * * *"
   workflow_dispatch:
 
 # Needed to push to the repo using GITHUB_TOKEN
@@ -65,7 +64,7 @@ jobs:
             echo "## 💤 No changes to flake.lock" >> "$GITHUB_STEP_SUMMARY"
           fi
 
-  # Optional: makes it super obvious in the UI which outcome happened
+  # makes it super obvious in the UI which outcome happened
   no-changes:
     needs: update-and-push
     if: needs.update-and-push.outputs.changed == 'false'

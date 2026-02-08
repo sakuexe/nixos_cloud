@@ -10,7 +10,7 @@ I mostly use Hetzner Cloud, so they are optimized for that.
 - Setting up new servers is Blazingly Fast™
 - Improved security with deterministic hardening through configurations
 - All VMs running the same version thanks to the [flake.lock](./flake.lock) file
-- Automated updates twice a day with Github Actions
+- Automated updates once a day with Github Actions
 
 ## Installation
 
