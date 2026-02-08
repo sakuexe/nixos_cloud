@@ -8,7 +8,7 @@
 #   pubkeys = import ../../modules/pubkeys.nix { inherit lib; };
 # in
 {
-  import = [
+  imports = [
     ../modules/docker.nix
     ../modules/shell.nix
   ];
