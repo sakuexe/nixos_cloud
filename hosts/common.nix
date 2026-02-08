@@ -14,6 +14,15 @@
     ../modules/ssh.nix
   ];
 
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [
+      80
+      443
+      2001
+    ];
+  };
+
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
