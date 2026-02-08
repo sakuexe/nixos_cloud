@@ -8,7 +8,10 @@
     ../modules/docker.nix
     ../modules/shell.nix
     ../modules/ssh.nix
+    ../modules/motd.nix
   ];
+
+  motd.enable = true;
 
   # a backup, os level firewall if one is 
   # not set in the hetzner dashboard

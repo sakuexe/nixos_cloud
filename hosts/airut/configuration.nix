@@ -7,6 +7,11 @@ in
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
+    ../../modules/motd.nix
+  ];
+
+  motd.dockerCompose.stacks = [
+    { name = "Airut"; path = "~/airut"; }
   ];
 
   networking.hostName = hostname;

@@ -8,7 +8,7 @@ I mostly use Hetzner Cloud, so they are optimized for that.
 
 - All server configurations in one place
 - Setting up new servers is Blazingly Fast™
-- Improved security with deterministic hardening through configurations
+- Improved security with declerative hardening with configuration files
 - All VMs running the same version thanks to the [flake.lock](./flake.lock) file
 - Automated updates once a day with Github Actions
 
