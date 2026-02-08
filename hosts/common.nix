@@ -11,6 +11,7 @@
   imports = [
     ../modules/docker.nix
     ../modules/shell.nix
+    ../modules/ssh.nix
   ];
 
   nix.settings.experimental-features = [
@@ -20,14 +21,6 @@
 
   # basic sane defaults for vms
   boot.loader.grub.enable = true;
-
-  services.openssh = {
-    enable = true;
-    settings = {
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
-    };
-  };
 
   users.users.root.openssh.authorizedKeys.keys = [
     # todo: update to use another global key,
