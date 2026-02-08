@@ -31,6 +31,9 @@
 
   # basic sane defaults for vms
   boot.loader.grub.enable = true;
+  boot.kernel.sysctl = {
+    "net.ipv4.ip_unprivileged_port_start" = 80; # or 0 to allow all ports
+  };
 
   users.users.${userSettings.username} = {
     isNormalUser = true;
