@@ -6,6 +6,13 @@
     ll = "ls -lhpg --color=auto";  # long format, hide hidden
     l = "ls -F --color=auto";      # list short form
 
+    c = "clear";
+    vi = "nvim";
+    ".." = "cd ..";
+    "..." = "cd ../..";
+    "...." = "cd ../../..";
+
+
     rebuild = ''
       sudo nixos-rebuild switch \
       --flake 'github:sakuexe/nixos_cloud#${hostname}' --refresh
