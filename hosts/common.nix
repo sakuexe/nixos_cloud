@@ -29,7 +29,8 @@
   # basic sane defaults for vms
   boot.loader.grub.enable = true;
   boot.kernel.sysctl = {
-    "net.ipv4.ip_unprivileged_port_start" = 80; # or 0 to allow all ports
+    # allow exposing of port 80 and above
+    "net.ipv4.ip_unprivileged_port_start" = 80;
   };
 
   users.users.${userSettings.username} = {
@@ -38,9 +39,8 @@
       "wheel"
     ];
     openssh.authorizedKeys.keys = [
-      # todo: update to use another global key,
-      # like a yubikey
-      # "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG/wnpQ9j6f5Wqk+jyZHSKxaCp34UMQUDVZlovV2yb3j"
+      # todo: add a global authorization key between all vms
+      # like a yubikey or something
     ];
   };
 
@@ -50,6 +50,7 @@
 
   time.timeZone = "UTC";
 
+  # btw
   programs.neovim = {
     enable = true;
     defaultEditor = true;
