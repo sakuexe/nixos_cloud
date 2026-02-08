@@ -126,10 +126,7 @@ in
       filesystems = fsEntries;
     }
     // mkIfNonEmpty cfg.dockerCompose.enable {
-      # docker_compose = dockerComposeStacks;
-      docker_compose = {
-        Airut = "/home/sakuk/airut";
-      };
+      docker_compose = dockerComposeStacks;
     }
     // mkIfNonEmpty cfg.fail2ban.enable {
       fail_2_ban = {
