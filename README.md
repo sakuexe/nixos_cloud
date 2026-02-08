@@ -4,6 +4,14 @@ This repository contains the files for my NixOS virtual machines.
 
 I mostly use Hetzner Cloud, so they are optimized for that.
 
+## Features
+
+- All server configurations in one place
+- Setting up new servers is Blazingly Fast™
+- Improved security with deterministic hardening through configurations
+- All VMs running the same version thanks to the [flake.lock](./flake.lock) file
+- Automated updates twice a day with Github Actions
+
 ## Installation
 
 The installation uses [nixos-anywhere](https://github.com/nix-community/nixos-anywhere)

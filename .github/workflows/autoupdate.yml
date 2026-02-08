@@ -1,37 +1,81 @@
-name: Update flake.lock directly to main
+name: Update flake.lock
 
 on:
   schedule:
-    # fires at 02:19 and 14:19
+    # runs on 02:19 and 14:19
     - cron: "19 2 * * *"
     - cron: "19 14 * * *"
   workflow_dispatch:
 
+# Needed to push to the repo using GITHUB_TOKEN
 permissions:
   contents: write
 
-jobs:
-  update:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+# Prevent overlapping runs (e.g. if one is slow and the next schedule starts)
+concurrency:
+  group: update-flake-lock
+  cancel-in-progress: true
 
-      - uses: DeterminateSystems/nix-installer-action@v12
-      - uses: DeterminateSystems/magic-nix-cache-action@v7
+jobs:
+  update-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # checkout sets up auth so `git push` can work with GITHUB_TOKEN
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v12
+
+      - name: Enable Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v7
 
       - name: Update flake.lock
         run: nix flake update
 
-      - name: Commit & push if changed
+      - name: Detect changes
+        id: diff
         run: |
           if git diff --quiet -- flake.lock; then
-            echo "No changes."
-            exit 0
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-          git config user.name "raino-bot"
-          git config user.email "nixos-raino-bot@users.noreply.github.com"
+      - name: Commit & push (only if changed)
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "nixos-cloud-bot"
+          git config user.email "nixos-cloud-bot@users.noreply.github.com"
 
           git add flake.lock
-          git commit -m "chore: update flake.lock"
-          git push
+          git commit -m "chore(flake): update flake.lock [skip ci]"
+          git push origin HEAD:main
+
+      - name: Job summary
+        run: |
+          if [ "${{ steps.diff.outputs.changed }}" = "true" ]; then
+            echo "## 🚀 flake.lock updated and pushed to main" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## 💤 No changes to flake.lock" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # Optional: makes it super obvious in the UI which outcome happened
+  no-changes:
+    needs: update-and-push
+    if: needs.update-and-push.outputs.changed == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No updates this run."
+
+  updated:
+    needs: update-and-push
+    if: needs.update-and-push.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Updated and pushed."
