@@ -3,9 +3,6 @@
   ...
 }:
 
-# let
-#   pubkeys = import ../../modules/pubkeys.nix { inherit lib; };
-# in
 {
   imports = [
     ../modules/docker.nix
@@ -43,7 +40,7 @@
     openssh.authorizedKeys.keys = [
       # todo: update to use another global key,
       # like a yubikey
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG/wnpQ9j6f5Wqk+jyZHSKxaCp34UMQUDVZlovV2yb3j"
+      # "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG/wnpQ9j6f5Wqk+jyZHSKxaCp34UMQUDVZlovV2yb3j"
     ];
   };
 

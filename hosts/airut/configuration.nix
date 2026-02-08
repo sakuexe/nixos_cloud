@@ -1,5 +1,8 @@
-{ config, pkgs, hostname, ... }:
+{ lib, hostname, userSettings, ... }:
 
+let
+  pubkeys = import ../../modules/pubkeys.nix { inherit lib; };
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -9,6 +12,8 @@
   networking.hostName = hostname;
   services.qemuGuest.enable = true;
 
+  users.users.${userSettings.username}.openssh.authorizedKeys.keys = pubkeys.readAll ./.;
+
   system.autoUpgrade = {
     enable = true;
     dates = "daily";
@@ -17,11 +22,11 @@
     flake = "github:sakuexe/nixos_cloud#${hostname}";
 
     operation = "boot";
-    allowReboot = false;
-    # rebootWindow = {
-    #   lower = "01:00";
-    #   upper = "03:00";
-    # };
+    allowReboot = true;
+    rebootWindow = {
+      lower = "01:00";
+      upper = "03:00";
+    };
 
     runGarbageCollection = true;
   };
@@ -29,6 +34,6 @@
   nix.gc = {
     automatic = true;
     dates = "weekly";
-    options = "--delete-older-than 14d";
+    options = "--delete-older-than 7d";
   };
 }
