@@ -24,21 +24,29 @@
           };
         };
 
-        # encrypted root
         root = {
           size = "100%";
           content = {
-            type = "luks";
-            name = "cryptroot";
-            settings.allowDiscards = true;
-
-            content = {
-              type = "filesystem";
-              format = "ext4";
-              mountpoint = "/";
-            };
+            type = "filesystem";
+            format = "ext4";
+            mountpoint = "/";
           };
         };
+        # # encrypted root
+        # root = {
+        #   size = "100%";
+        #   content = {
+        #     type = "luks";
+        #     name = "cryptroot";
+        #     settings.allowDiscards = true;
+        #
+        #     content = {
+        #       type = "filesystem";
+        #       format = "ext4";
+        #       mountpoint = "/";
+        #     };
+        #   };
+        # };
 
       };
     };

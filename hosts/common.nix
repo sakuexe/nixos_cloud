@@ -8,6 +8,11 @@
 #   pubkeys = import ../../modules/pubkeys.nix { inherit lib; };
 # in
 {
+  import = [
+    ../modules/docker.nix
+    ../modules/shell.nix
+  ];
+
   nix.settings.experimental-features = [
     "nix-command"
     "flakes"
@@ -34,7 +39,6 @@
     isNormalUser = true;
     extraGroups = [
       "wheel"
-      "docker"
     ];
     openssh.authorizedKeys.keys = [
       # todo: update to use another global key,
@@ -52,6 +56,12 @@
   programs.neovim = {
     enable = true;
     defaultEditor = true;
+  };
+
+  programs.git.enable = true;
+  programs.git.config = {
+    user.name = userSettings.username;
+    user.email = userSettings.email;
   };
 
   system.stateVersion = "25.11";
