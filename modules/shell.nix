@@ -18,5 +18,6 @@
       --flake 'github:sakuexe/nixos_cloud#${hostname}' --refresh
     '';
     dockerref = "docker compose down && docker compose up -d";
+    dl = "docker compose logs";
   };
 }

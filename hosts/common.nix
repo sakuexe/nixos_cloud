@@ -38,6 +38,10 @@
 
   users.users.${userSettings.username} = {
     isNormalUser = true;
+    # keeps the user processes running
+    # even when not logged in
+    # (needed for rootless docker to work)
+    linger = true; 
     extraGroups = [
       "wheel"
     ];
