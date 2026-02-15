@@ -1,5 +1,6 @@
 {
   userSettings,
+  hostname,
   ...
 }:
 
@@ -11,7 +12,7 @@
     ../modules/motd.nix
   ];
 
-  motd.enable = true;
+  networking.hostName = hostname;
 
   # a backup, os level firewall if one is 
   # not set in the hetzner dashboard
@@ -67,6 +68,31 @@
   programs.git.config = {
     user.name = userSettings.username;
     user.email = userSettings.email;
+  };
+
+  motd.enable = true;
+
+  system.autoUpgrade = {
+    enable = true;
+    dates = "00:30"; # 03:30 / 02:30, Helsinki time (winter / summer)
+    randomizedDelaySec = "30min";
+
+    flake = "github:sakuexe/nixos_cloud#${hostname}";
+
+    operation = "boot";
+    allowReboot = true;
+    rebootWindow = {
+      lower = "01:00";
+      upper = "02:30";
+    };
+
+    runGarbageCollection = true;
+  };
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";
   };
 
   system.stateVersion = "25.11";

@@ -2,8 +2,9 @@ name: Update flake.lock
 
 on:
   schedule:
-    # runs on 02:19
-    - cron: "19 2 * * *"
+    # runs at 02:19, Helsinki time
+    # - cron: "19 0 * * *" # summer
+    - cron: "19 23 * * *" # winter
   workflow_dispatch:
 
 # needed to push to the repo using GITHUB_TOKEN
