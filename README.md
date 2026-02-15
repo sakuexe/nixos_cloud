@@ -25,7 +25,9 @@ to make the process easy.
 **Command**
 
 ```bash
-nix run github:nix-community/nixos-anywhere -- \                                                                                                                                                       4m 21.737s
+nix run github:nix-community/nixos-anywhere -- \
+  --ssh-option IdentityFile=~/.ssh/<SSH_KEY> \
+  --ssh-option IdentitiesOnly=yes \
   --flake .#<HOST_CONFIG_NAME> \
   --generate-hardware-config nixos-generate-config \
   ./hosts/<HOST_CONFIG_NAME>/hardware-configuration.nix \

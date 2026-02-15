@@ -14,7 +14,7 @@
 
   networking.hostName = hostname;
 
-  # a backup, os level firewall if one is 
+  # a backup, os level firewall if one is
   # not set in the hetzner dashboard
   networking.firewall = {
     enable = true;
@@ -23,6 +23,13 @@
       443
       2001
     ];
+  };
+
+  # ipv6 support for hetzner
+  networking.enableIPv6 = true;
+  networking.defaultGateway6 = {
+    address = "fe80::1";
+    interface = "enp1s0";
   };
 
   nix.settings.experimental-features = [
@@ -42,13 +49,14 @@
     # keeps the user processes running
     # even when not logged in
     # (needed for rootless docker to work)
-    linger = true; 
+    linger = true;
     extraGroups = [
       "wheel"
     ];
     openssh.authorizedKeys.keys = [
       # todo: add a global authorization key between all vms
       # like a yubikey or something
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILzNnTuvUw8pHAXIVOUISHCVfKlMTbNTwrLhazYC65vl"
     ];
   };
 
