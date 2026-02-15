@@ -34,6 +34,31 @@ jobs:
       - name: Enable Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v7
 
+      - name: Build system (before) and capture closure
+        id: before
+        run: |
+          BEFORE=$(nix build --no-link --print-out-paths .#nixosConfigurations.YOUR_HOSTNAME.config.system.build.toplevel)
+          echo "path=$BEFORE" >> "$GITHUB_OUTPUT"
+
+      - name: Capture toplevel closures (before)
+        id: before
+        run: |
+          set -euo pipefail
+
+          # List nixosConfigurations names from the flake
+          nix flake show --json \
+            | jq -r '.nixosConfigurations | keys[]' > hosts.txt
+
+          echo "Detected configurations:"
+          cat hosts.txt
+
+          mkdir -p closures/before
+          while read -r host; do
+            echo "Building BEFORE for $host"
+            path=$(nix build --no-link --print-out-paths ".#nixosConfigurations.${host}.config.system.build.toplevel")
+            echo "$path" > "closures/before/${host}"
+          done < hosts.txt
+
       - name: Update flake.lock
         run: nix flake update
 
@@ -46,35 +71,37 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit & push (only if changed)
+      - name: Capture toplevel closures (after)
+        if: steps.diff.outputs.changed == 'true'
+        id: after
+        run: |
+          set -euo pipefail
+          mkdir -p closures/after
+          while read -r host; do
+            echo "Building AFTER for $host"
+            path=$(nix build --no-link --print-out-paths ".#nixosConfigurations.${host}.config.system.build.toplevel")
+            echo "$path" > "closures/after/${host}"
+          done < hosts.txt
+
+      - name: Job summary (all NixOS configurations)
         if: steps.diff.outputs.changed == 'true'
         run: |
-          git config user.name "nixos-cloud-bot"
-          git config user.email "nixos-cloud-bot@users.noreply.github.com"
+          set -euo pipefail
 
-          git add flake.lock
-          git commit -m "chore(flake): update flake.lock [skip ci]"
-          git push origin HEAD:main
+          echo "## 📦 Package changes by NixOS configuration" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Job summary
-        run: |
-          if [ "${{ steps.diff.outputs.changed }}" = "true" ]; then
-            echo "## 🚀 flake.lock updated and pushed to main" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "## 💤 No changes to flake.lock" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          while read -r host; do
+            before=$(cat "closures/before/${host}")
+            after=$(cat "closures/after/${host}")
 
-  # makes it super obvious in the UI which outcome happened
-  no-changes:
-    needs: update-and-push
-    if: needs.update-and-push.outputs.changed == 'false'
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "No updates this run."
-
-  updated:
-    needs: update-and-push
-    if: needs.update-and-push.outputs.changed == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Updated and pushed."
+            echo "### ${host}" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Before:** \`${before}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **After:**  \`${after}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            nix store diff-closures "$before" "$after" >> "$GITHUB_STEP_SUMMARY" || true
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          done < hosts.txt
