@@ -103,5 +103,8 @@
     options = "--delete-older-than 7d";
   };
 
+  # 128 MiB
+  nix.settings.download-buffer-size = 128 * 1024 * 1024;
+
   system.stateVersion = "25.11";
 }
