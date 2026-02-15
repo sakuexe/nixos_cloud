@@ -34,12 +34,6 @@ jobs:
       - name: Enable Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v7
 
-      - name: Build system (before) and capture closure
-        id: before
-        run: |
-          BEFORE=$(nix build --no-link --print-out-paths .#nixosConfigurations.YOUR_HOSTNAME.config.system.build.toplevel)
-          echo "path=$BEFORE" >> "$GITHUB_OUTPUT"
-
       - name: Capture toplevel closures (before)
         id: before
         run: |
