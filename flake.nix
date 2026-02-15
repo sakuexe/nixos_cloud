@@ -33,6 +33,7 @@
     nixosConfigurations = {
       airut = mkHost "airut";
       taurudesign = mkHost "taurudesign";
+      helmiala = mkHost "helmiala";
     };
   };
 }
