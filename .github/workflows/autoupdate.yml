@@ -6,20 +6,44 @@ on:
     - cron: "19 2 * * *"
   workflow_dispatch:
 
-# Needed to push to the repo using GITHUB_TOKEN
+# needed to push to the repo using GITHUB_TOKEN
 permissions:
   contents: write
 
-# Prevent overlapping runs (e.g. if one is slow and the next schedule starts)
+# prevent overlapping runs
 concurrency:
   group: update-flake-lock
   cancel-in-progress: true
 
 jobs:
-  update-and-push:
+  check-for-changes:
     runs-on: ubuntu-latest
     outputs:
       changed: ${{ steps.diff.outputs.changed }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v12
+
+      - name: Update flake.lock
+        run: nix flake update
+
+      - name: Detect changes
+        id: diff
+        run: |
+          if git diff --quiet -- flake.lock; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  update-and-push:
+    needs: check-for-changes
+    if: needs.check-for-changes.outputs.changed == 'true'
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -29,17 +53,15 @@ jobs:
           fetch-depth: 0
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v12
-
-      - name: Enable Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v7
+        uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Capture toplevel closures (before)
         id: before
         run: |
           set -euo pipefail
 
-          # List nixosConfigurations names from the flake
           nix flake show --json \
             | jq -r '.nixosConfigurations | keys[]' > hosts.txt
 
