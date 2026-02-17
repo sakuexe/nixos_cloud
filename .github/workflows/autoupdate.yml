@@ -107,6 +107,9 @@ jobs:
 
           echo "## 📦 Package changes by NixOS configuration" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
+          strip_ansi() {
+            sed -r 's/\x1B\[[0-9;]*[mK]//g'
+          }
 
           while read -r host; do
             before=$(cat "closures/before/${host}")
@@ -119,12 +122,25 @@ jobs:
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
 
-            diff_output="$(nix store diff-closures "$before" "$after" || true)"
+            diff_output="$(
+              nix store diff-closures "$before" "$after" 2>&1 || true
+            )"
+            diff_output="$(printf '%s' "$diff_output" | strip_ansi)"
 
-            if [ -z "$diff_output" ]; then
-              echo "no changes" >> "$GITHUB_STEP_SUMMARY"
+            # if diff-closures prints nothing, fall back to a size direction line.
+            if [ -z "$(printf '%s' "$diff_output" | tr -d '[:space:]')" ]; then
+              b_bytes="$(nix path-info -S --json "$before" | jq -r '.[0].narSize')"
+              a_bytes="$(nix path-info -S --json "$after"  | jq -r '.[0].narSize')"
+
+              if [ "$a_bytes" -gt "$b_bytes" ]; then
+                echo "no changes (closure size increased: ${b_bytes} → ${a_bytes} bytes)" >> "$GITHUB_STEP_SUMMARY"
+              elif [ "$a_bytes" -lt "$b_bytes" ]; then
+                echo "no changes (closure size decreased: ${b_bytes} → ${a_bytes} bytes)" >> "$GITHUB_STEP_SUMMARY"
+              else
+                echo "no changes (closure size unchanged: ${b_bytes} bytes)" >> "$GITHUB_STEP_SUMMARY"
+              fi
             else
-              echo "$diff_output" >> "$GITHUB_STEP_SUMMARY"
+              printf '%s\n' "$diff_output" >> "$GITHUB_STEP_SUMMARY"
             fi
 
             echo '```' >> "$GITHUB_STEP_SUMMARY"
