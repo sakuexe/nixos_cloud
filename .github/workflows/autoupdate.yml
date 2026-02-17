@@ -27,7 +27,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v12
+        uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update flake.lock
         run: nix flake update
@@ -79,17 +81,7 @@ jobs:
       - name: Update flake.lock
         run: nix flake update
 
-      - name: Detect changes
-        id: diff
-        run: |
-          if git diff --quiet -- flake.lock; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Capture toplevel closures (after)
-        if: steps.diff.outputs.changed == 'true'
         id: after
         run: |
           set -euo pipefail
@@ -100,8 +92,16 @@ jobs:
             echo "$path" > "closures/after/${host}"
           done < hosts.txt
 
+      - name: Commit & push (only if changed)
+        run: |
+          git config user.name "nixos-cloud-bot"
+          git config user.email "nixos-cloud-bot@users.noreply.github.com"
+
+          git add flake.lock
+          git commit -m "chore: update flake.lock"
+          git push origin HEAD:main
+
       - name: Job summary (all NixOS configurations)
-        if: steps.diff.outputs.changed == 'true'
         run: |
           set -euo pipefail
 
@@ -118,7 +118,15 @@ jobs:
             echo "- **After:**  \`${after}\`" >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
-            nix store diff-closures "$before" "$after" >> "$GITHUB_STEP_SUMMARY" || true
+
+            diff_output="$(nix store diff-closures "$before" "$after" || true)"
+
+            if [ -z "$diff_output" ]; then
+              echo "no changes" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "$diff_output" >> "$GITHUB_STEP_SUMMARY"
+            fi
+
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             echo "" >> "$GITHUB_STEP_SUMMARY"
           done < hosts.txt
