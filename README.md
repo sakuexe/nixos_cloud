@@ -12,6 +12,13 @@ I mostly use Hetzner Cloud, so they are optimized for that.
 - All VMs running the same version thanks to the [flake.lock](./flake.lock) file
 - Automated updates once a day with Github Actions
 
+## Updates
+
+The system checks for updates once a day and applies them to the 
+configuration if there are any.
+
+[Update notes](https://github.com/sakuexe/nixos_cloud/actions?query=event%3Aschedule+is%3Asuccess++)
+
 ## Installation
 
 The installation uses [nixos-anywhere](https://github.com/nix-community/nixos-anywhere)
