@@ -75,7 +75,7 @@ in
     '';
   };
 
-  systemd.services."mikromet-ci" = {
+  systemd.user.services."mikromet-ci" = {
     path = [ pkgs.git pkgs.openssh pkgs.docker ];
 
     serviceConfig = {
