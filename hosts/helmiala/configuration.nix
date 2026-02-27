@@ -2,6 +2,7 @@
   lib,
   hostname,
   userSettings,
+  pkgs,
   ...
 }:
 
@@ -25,7 +26,8 @@ in
     }
   ];
 
-  systemd.timers."ci-batch" = {
+  systemd.user.timers."ci-batch" = {
+    description = "Run CI jobs every 10 minutes";
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "*-*-* *:0/10:00";
@@ -34,7 +36,7 @@ in
     };
   };
 
-  systemd.targets."ci-batch" = {
+  systemd.user.targets."ci-batch" = {
     description = "Run all CI jobs";
     wants = [
       "helmiala-ci.service"
@@ -42,47 +44,64 @@ in
     ];
   };
 
-  systemd.services."helmiala-ci" = {
+  systemd.user.services."helmiala-ci" = {
+    path = [ pkgs.git pkgs.openssh pkgs.docker ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      WorkingDirectory = "/home/${userSettings.username}/website";
+
+      Environment = [
+        "XDG_RUNTIME_DIR=/run/user/1000"
+        "DOCKER_HOST=unix:///run/user/1000/docker.sock"
+      ];
+    };
+
     script = ''
       set -euo pipefail
 
       git fetch
-
-      if git diff --quiet origin/main; then
-        exit 0 # no changes
+      LOCAL="$(git rev-parse HEAD)"
+      REMOTE="$(git rev-parse origin/main)"
+      if [ "$LOCAL" = "$REMOTE" ]; then
+        exit 0
       fi
-
-      git pull
+      echo "Changes from origin/main, pulling and building"
+      git pull --ff-only
 
       docker compose build
       docker compose down
       docker compose up -d
     '';
-    serviceConfig = {
-      Type = "oneshot";
-      User = userSettings.username;
-      WorkingDirectory = "/home/${userSettings.username}/website";
-    };
   };
 
   systemd.services."mikromet-ci" = {
+    path = [ pkgs.git pkgs.openssh pkgs.docker ];
+
+    serviceConfig = {
+      Type = "oneshot";
+      WorkingDirectory = "/home/${userSettings.username}/mikromet";
+      Environment = [
+        "XDG_RUNTIME_DIR=/run/user/1000"
+        "DOCKER_HOST=unix:///run/user/1000/docker.sock"
+      ];
+    };
+
     script = ''
       set -euo pipefail
 
       git fetch
-      if git diff --quiet origin/main; then
-        exit 0 # no changes
+      LOCAL="$(git rev-parse HEAD)"
+      REMOTE="$(git rev-parse origin/main)"
+      if [ "$LOCAL" = "$REMOTE" ]; then
+        exit 0
       fi
-      git pull
+      echo "Changes from origin/main, pulling and building"
+      git pull --ff-only
 
       docker compose build
       docker compose down
       docker compose up -d
     '';
-    serviceConfig = {
-      Type = "oneshot";
-      User = userSettings.username;
-      WorkingDirectory = "/home/${userSettings.username}/mikromet";
-    };
   };
 }
