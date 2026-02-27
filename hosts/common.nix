@@ -1,6 +1,7 @@
 {
   userSettings,
   hostname,
+  pkgs,
   ...
 }:
 
@@ -79,6 +80,10 @@
   };
 
   motd.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    btop
+  ];
 
   system.autoUpgrade = {
     enable = true;
