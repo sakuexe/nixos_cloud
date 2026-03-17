@@ -6,9 +6,7 @@
 {
   # docker
   # https://wiki.nixos.org/wiki/Docker
-
-  # disable rootful docker
-  virtualisation.docker.enable = false;
+  virtualisation.docker.enable = true;
 
   # include the user in the docker group
   users.users."${userSettings.username}".extraGroups = [
