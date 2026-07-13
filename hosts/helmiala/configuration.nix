@@ -45,7 +45,7 @@ in
   };
 
   systemd.user.services."helmiala-ci" = {
-    path = [ pkgs.git pkgs.openssh pkgs.docker ];
+    path = [ pkgs.git pkgs.openssh pkgs.docker_29 ];
 
     serviceConfig = {
       Type = "oneshot";
@@ -76,7 +76,7 @@ in
   };
 
   systemd.user.services."mikromet-ci" = {
-    path = [ pkgs.git pkgs.openssh pkgs.docker ];
+    path = [ pkgs.git pkgs.openssh pkgs.docker_29 ];
 
     serviceConfig = {
       Type = "oneshot";
