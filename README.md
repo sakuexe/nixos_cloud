@@ -44,3 +44,11 @@ nix run github:nix-community/nixos-anywhere -- \
 ## References
 
 - [Install NixOS on Hetzner - NixOS Wiki](https://wiki.nixos.org/wiki/Install_NixOS_on_Hetzner_Cloud)
+
+## Fixes to past problems
+
+If a vm keeps forgetting where the docker.user systemd service is,
+use this answer's method and it should start working again. If it
+just keeps happening, look into the garbage collection.
+
+[Rootless Docker Broken](https://discourse.nixos.org/t/rootless-docker-broken-unit-docker-service-not-found/65112)
