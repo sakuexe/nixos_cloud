@@ -1,5 +1,6 @@
 {
   userSettings,
+  pkgs,
   ...
 }:
 
@@ -7,6 +8,7 @@
   # docker
   # https://wiki.nixos.org/wiki/Docker
   virtualisation.docker.enable = true;
+  virtualisation.docker.package = pkgs.docker_29;
 
   # include the user in the docker group
   users.users."${userSettings.username}".extraGroups = [
