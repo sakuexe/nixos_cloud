@@ -55,9 +55,9 @@
       "wheel"
     ];
     openssh.authorizedKeys.keys = [
-      # todo: add a global authorization key between all vms
-      # like a yubikey or something
+      # global master keys
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILzNnTuvUw8pHAXIVOUISHCVfKlMTbNTwrLhazYC65vl"
+      "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIFPvwro2ayuSkxZlHC/QjR6o869Tv6zyG7nz0l2BF5bpAAAABHNzaDo="
     ];
   };
 
