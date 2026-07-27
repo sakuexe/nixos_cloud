@@ -129,8 +129,8 @@ jobs:
 
             # if diff-closures prints nothing, fall back to a size direction line.
             if [ -z "$(printf '%s' "$diff_output" | tr -d '[:space:]')" ]; then
-              b_bytes="$(nix path-info --closure-size --json --json-format 2 "$before" | jq -r '.[].closureSize')"
-              a_bytes="$(nix path-info --closure-size --json --json-format 2 "$after"  | jq -r '.[].closureSize')"
+              b_bytes="$(nix path-info --closure-size --json --json-format 2 "$before" | jq -r 'if type=="array" then .[0].closureSize else to_entries[0].value.closureSize end')"
+              a_bytes="$(nix path-info --closure-size --json --json-format 2 "$after"  | jq -r 'if type=="array" then .[0].closureSize else to_entries[0].value.closureSize end')"
 
               if [ "$a_bytes" -gt "$b_bytes" ]; then
                 echo "no changes (closure size increased: ${b_bytes} → ${a_bytes} bytes)" >> "$GITHUB_STEP_SUMMARY"
