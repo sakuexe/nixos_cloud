@@ -41,6 +41,20 @@ nix run github:nix-community/nixos-anywhere -- \
   root@<REMOTE_IP>
 ```
 
+If during installation you get a kexec error. Try running the command
+with the -c flag (ignore kexec signature check (legacy)).
+
+```bash
+nix run github:nix-community/nixos-anywhere -- \
+  --ssh-option IdentityFile=~/.ssh/<SSH_KEY> \
+  --ssh-option IdentitiesOnly=yes \
+  --kexec-extra-flags "-c" \
+  --flake .#<HOST_CONFIG_NAME> \
+  --generate-hardware-config nixos-generate-config \
+  ./hosts/<HOST_CONFIG_NAME>/hardware-configuration.nix \
+  root@<REMOTE_IP>
+```
+
 ## References
 
 - [Install NixOS on Hetzner - NixOS Wiki](https://wiki.nixos.org/wiki/Install_NixOS_on_Hetzner_Cloud)
