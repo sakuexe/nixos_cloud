@@ -83,6 +83,7 @@
 
   environment.systemPackages = with pkgs; [
     btop
+    tree
   ];
 
   system.autoUpgrade = {
