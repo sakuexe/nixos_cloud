@@ -25,39 +25,30 @@ in
     }
   ];
 
-  systemd.user.timers."ci-batch" = {
+  systemd.user.timers."holvium-ci" = {
     description = "Run CI jobs every 5 minutes";
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "*-*-* *:0/5:00";
       Persistent = true;
-      Unit = "ci-batch.target";
     };
   };
-
-  systemd.user.targets."ci-batch" = {
-    description = "Run all CI jobs";
-    wants = [
-      "holvium-ci.service"
-    ];
-  };
-
   systemd.user.services."holvium-ci" = {
-    path = [ pkgs.git pkgs.openssh pkgs.docker_29 ];
-
+    path = [
+      pkgs.git
+      pkgs.openssh
+      pkgs.docker_29
+    ];
     serviceConfig = {
       Type = "oneshot";
-      WorkingDirectory = "/home/${userSettings.username}/holvium";
-
-      Environment = [
-        "XDG_RUNTIME_DIR=/run/user/1000"
-        "DOCKER_HOST=unix:///run/user/1000/docker.sock"
-      ];
     };
-
+    environment = {
+      XDG_RUNTIME_DIR = "/run/user/1000";
+      DOCKER_HOST = "unix:///run/user/1000/docker.sock";
+    };
     script = ''
       set -euo pipefail
-
+      cd /home/${userSettings.username}/holvium
       git fetch
       LOCAL="$(git rev-parse HEAD)"
       REMOTE="$(git rev-parse origin/main)"
@@ -66,7 +57,6 @@ in
       fi
       echo "Changes from origin/main, pulling and building"
       git pull --ff-only
-
       docker compose build
       docker compose down
       docker compose up -d
