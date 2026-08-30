@@ -1,4 +1,5 @@
 {
+  pkgs,
   lib,
   hostname,
   userSettings,
@@ -23,5 +24,9 @@ in
       address = "2a01:4f9:c014:1fd::1";
       prefixLength = 64;
     }
+  ];
+
+  environment.systemPackages = with pkgs; [
+    sqlite
   ];
 }
