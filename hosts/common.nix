@@ -84,6 +84,7 @@
   environment.systemPackages = with pkgs; [
     btop
     tree
+    jq
   ];
 
   system.autoUpgrade = {
