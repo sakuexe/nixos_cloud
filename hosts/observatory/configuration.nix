@@ -11,6 +11,7 @@ in
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
+    ./uptime-monitoring.nix
     ../../modules/motd.nix
   ];
 
