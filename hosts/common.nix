@@ -85,6 +85,7 @@
     btop
     tree
     jq
+    bat
   ];
 
   system.autoUpgrade = {
