@@ -13,6 +13,7 @@ in
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
+    ./backups.nix
     ../../modules/motd.nix
   ];
 

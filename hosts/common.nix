@@ -47,6 +47,8 @@
 
   users.users.${userSettings.username} = {
     isNormalUser = true;
+    # pinned so paths like /run/user/<uid> can be referenced from the config
+    uid = 1000;
     # keeps the user processes running
     # even when not logged in
     # (needed for rootless docker to work)
@@ -60,6 +62,12 @@
       "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIFPvwro2ayuSkxZlHC/QjR6o869Tv6zyG7nz0l2BF5bpAAAABHNzaDo="
     ];
   };
+
+  # authorized keys live in /etc/ssh/authorized_keys.d, so nothing else creates
+  # ~/.ssh, and ssh-copy-id needs it to exist
+  systemd.tmpfiles.rules = [
+    "d /home/${userSettings.username}/.ssh 0700 ${userSettings.username} users -"
+  ];
 
   security.sudo.wheelNeedsPassword = false;
 
