@@ -22,8 +22,9 @@ in
     # The rootless Docker user: reads the volumes and owns the Docker socket, nothing runs as root
     user = userSettings.username;
     initialize = true;
-    # Relative to the sub-account's base directory
-    repository = "sftp:${box}:/restic";
+    # Relative, so it lands in the login directory (/home, the sub-account's base
+    # directory). The sub-account's / is root-owned and not writable
+    repository = "sftp:${box}:restic";
     extraOptions = [
       "sftp.command='ssh -p 23 -i ${home}/.config/restic/storagebox_ed25519 ${box} -s sftp'"
     ];
