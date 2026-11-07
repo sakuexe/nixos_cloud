@@ -12,9 +12,49 @@ let
   cfg = config.services.restic.backups.taurudesign;
 
   restore = import ./restore.nix { inherit pkgs lib cfg staging volumes dockerHost; };
+
+  # Last backup result as "<up|down> <epoch> <msg>". On disk because systemd's own
+  # unit state is wiped by the nightly autoUpgrade reboot
+  lastRun = "${home}/.local/state/restic/last-run";
+
+  # Usage: kuma-push <up|down> <msg>
+  kumaPush = pkgs.writeShellScript "kuma-push" ''
+    # Created by hand like the password: the token lets anyone mark the monitor up
+    url=$(cat ${home}/.config/restic/kuma-push-url) || exit 0
+    # A Kuma outage shouldn't count as a failed backup
+    ${pkgs.curl}/bin/curl -fsS -m 10 --retry 3 -o /dev/null -G \
+      --data-urlencode "status=$1" --data-urlencode "msg=$2" "$url" || true
+  '';
+
+  # Re-reports the last result so Kuma notices silence (dead VPS, timer never firing)
+  # within its heartbeat interval, not only when a run happens
+  kumaHeartbeat = pkgs.writeShellScript "restic-kuma-heartbeat" ''
+    if ! read -r status ts msg < ${lastRun}; then
+      exec ${kumaPush} down "no backup recorded"
+    fi
+    age=$(( $(date +%s) - ts ))
+    if [ "$status" != up ]; then
+      exec ${kumaPush} down "last backup failed: $msg"
+    # Daily run + randomized delay + runtime, with slack
+    elif [ "$age" -gt $(( 26 * 3600 )) ]; then
+      exec ${kumaPush} down "stale: last backup $(( age / 3600 ))h ago"
+    else
+      exec ${kumaPush} up "OK, last backup $(( age / 3600 ))h ago"
+    fi
+  '';
 in
 {
   environment.systemPackages = [ restore ];
+
+  # Push at half of Kuma's 60 min heartbeat interval, so one lost push doesn't alert
+  systemd.services.restic-kuma-heartbeat = {
+    startAt = "*:0/30";
+    serviceConfig = {
+      Type = "oneshot";
+      User = userSettings.username;
+      ExecStart = kumaHeartbeat;
+    };
+  };
 
   # The unit can't answer a host key prompt, so pin the Storage Box key system-wide.
   # Get it with `ssh-keyscan -p 23 -t ed25519 <box>.your-storagebox.de` and check it
@@ -53,20 +93,20 @@ in
       ${pkgs.docker_29}/bin/docker exec keycloak-postgres \
         sh -c 'pg_dump -U "$POSTGRES_USER" -Fc "$POSTGRES_DB"' > ${staging}/keycloak.dump
     '';
-    # Runs after every run (ExecStopPost) and reports to an Uptime Kuma push
-    # monitor, which also alerts when no run happens at all
+    # Runs after every run (ExecStopPost): records the result for the heartbeat and
+    # pushes it right away, so a failure alerts now rather than at the next heartbeat
     backupCleanupCommand = ''
       #!${pkgs.runtimeShell}
       rm -rf ${staging}
 
-      # Created by hand like the password: the token lets anyone mark the monitor up
-      url=$(cat ${home}/.config/restic/kuma-push-url) || exit 0
       # systemd sets these for ExecStopPost; success means backup, prune and check all passed
       if [ "$SERVICE_RESULT" = success ]; then status=up msg=OK
       else status=down msg="$SERVICE_RESULT ($EXIT_STATUS)"; fi
-      # A Kuma outage shouldn't count as a failed backup
-      ${pkgs.curl}/bin/curl -fsS -m 10 --retry 3 -o /dev/null -G \
-        --data-urlencode "status=$status" --data-urlencode "msg=$msg" "$url" || true
+
+      mkdir -p "$(dirname ${lastRun})"
+      # tmp + mv so the heartbeat never reads a half-written file
+      echo "$status $(date +%s) $msg" > ${lastRun}.tmp && mv ${lastRun}.tmp ${lastRun}
+      ${kumaPush} "$status" "$msg"
     '';
 
     paths = [
