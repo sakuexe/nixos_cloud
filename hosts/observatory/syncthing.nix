@@ -13,7 +13,7 @@
       options.localAnnounceEnabled = false;
 
       devices = {
-        pc.id = "PC-DEVICE-ID";
+        pc.id = "VYXRJVJ-XHQMAIY-TKNGDEZ-35VAEDS-RKITW25-Z4B4PDW-LGQ3TB4-GYJEVQ4";
         deck.id = "DECK-DEVICE-ID";
       };
 
