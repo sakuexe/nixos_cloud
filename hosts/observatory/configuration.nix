@@ -12,6 +12,7 @@ in
     ./hardware-configuration.nix
     ./disko.nix
     ./uptime-monitoring.nix
+    ./syncthing.nix
     ../../modules/motd.nix
   ];
 
