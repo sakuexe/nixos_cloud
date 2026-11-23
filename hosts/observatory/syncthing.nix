@@ -14,7 +14,7 @@
 
       devices = {
         pc.id = "VYXRJVJ-XHQMAIY-TKNGDEZ-35VAEDS-RKITW25-Z4B4PDW-LGQ3TB4-GYJEVQ4";
-        deck.id = "DECK-DEVICE-ID";
+        deck.id = "ZB6G6T5-GJYWVQC-RVPPJ3I-44BS4LC-RCL22HS-XM5KC7O-OKIACR3-33DJ6QI";
       };
 
       folders."unleashed-saves" = {
